@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>MineAgent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><img src="../icon.png" alt=""><div><b>MineAgent</b><small>ИИ-компаньон для Minecraft</small></div></div>
+  <nav>
+    <button class="nav active" data-page="bot">Бот</button>
+    <button class="nav" data-page="settings">Настройки</button>
+    <button class="nav" data-page="help">Справка</button>
+  </nav>
+  <div class="sidebar-foot">
+    <div id="state-pill" class="pill stopped"><span class="dot"></span><span id="state-text">Остановлен</span></div>
+    <small id="version"></small>
+  </div>
+</aside>
+
+<main>
+  <!-- ===== Бот ===== -->
+  <section id="page-bot" class="page active">
+    <header class="row">
+      <h1>Бот</h1>
+      <div class="spacer"></div>
+      <button id="btn-start" class="primary big">▶ Запустить</button>
+      <button id="btn-stop" class="danger big" hidden>■ Остановить</button>
+    </header>
+    <div id="first-run" class="banner" hidden>Первый запуск: укажите адрес сервера Minecraft и модели LM Studio на вкладке <a href="#" data-goto="settings">Настройки</a>, затем нажмите «Запустить».</div>
+    <div class="stats">
+      <div class="stat"><small>Здоровье</small><b id="st-hp">—</b></div>
+      <div class="stat"><small>Еда</small><b id="st-food">—</b></div>
+      <div class="stat"><small>Позиция</small><b id="st-pos">—</b></div>
+      <div class="stat"><small>Время</small><b id="st-time">—</b></div>
+      <div class="stat wide"><small>Текущая задача</small><b id="st-task">—</b></div>
+    </div>
+    <div class="cols">
+      <div class="card col">
+        <div class="card-head"><b>Чат с ботом</b><small>Пишите без имени бота. <code>!help</code> — список команд</small></div>
+        <div id="chat" class="chat"></div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" placeholder="Например: наруби 10 брёвен" autocomplete="off">
+          <label class="check small" title="Отправить в общий чат игры как сообщение от бота"><input type="checkbox" id="chat-ingame"> в игру</label>
+          <button class="primary" type="submit">Отправить</button>
+        </form>
+      </div>
+      <div class="card col">
+        <div class="card-head"><b>Журнал</b>
+          <select id="log-level"><option value="info" selected>info и выше</option><option value="debug">все</option><option value="warn">только проблемы</option></select>
+          <button id="log-clear" class="ghost">Очистить</button>
+        </div>
+        <div id="log" class="log"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Настройки ===== -->
+  <section id="page-settings" class="page">
+    <header class="row"><h1>Настройки</h1><div class="spacer"></div>
+      <button id="btn-open-data" class="ghost">Папка данных</button>
+      <button id="btn-reset" class="ghost">Сбросить</button>
+      <button id="btn-save" class="primary">Сохранить</button>
+    </header>
+    <div id="save-note" class="note" hidden></div>
+
+    <div class="card">
+      <h2>Сервер Minecraft</h2>
+      <div class="grid">
+        <label>Адрес сервера<input id="mc-host" placeholder="127.0.0.1"></label>
+        <label>Порт<input id="mc-port" type="number" min="1" max="65535" placeholder="25565"></label>
+        <label>Имя бота (ник)<input id="mc-username" placeholder="Bob"></label>
+        <label>Авторизация<select id="mc-auth"><option value="offline">offline (без аккаунта)</option><option value="microsoft">microsoft (лицензия)</option></select></label>
+        <label>Версия игры<input id="mc-version" placeholder="авто (например 1.21.4)"></label>
+        <label>Как обращаться к боту в чате<input id="bot-triggers" placeholder="Боб, Bob"></label>
+        <label class="full">Кто может командовать (ники через запятую, пусто = все)<input id="bot-owners" placeholder="Steve, Alex"></label>
+      </div>
+      <small class="hint">Mineflayer поддерживает Minecraft до 26.1. Пустая версия — определяется автоматически при подключении.</small>
+    </div>
+
+    <div class="card">
+      <h2>Нейросеть (LM Studio)</h2>
+      <div class="grid">
+        <label class="full">Адрес сервера LM Studio<div class="row"><input id="llm-url" placeholder="http://localhost:1234/v1"><button id="btn-models" class="ghost">Проверить и загрузить модели</button></div></label>
+        <label>API-ключ<input id="llm-key" placeholder="lm-studio"></label>
+        <label>Режим работы
+          <select id="llm-mode"><option value="single">Одна модель (чат + написание навыков)</option><option value="dual">Две модели (чат + отдельная coder-модель)</option></select>
+        </label>
+        <label>Модель для чата и команд<input id="llm-chat" list="models" placeholder="qwen2.5-7b-instruct"></label>
+        <label id="lbl-coder">Coder-модель (генерация навыков)<input id="llm-coder" list="models" placeholder="qwen2.5-coder-14b-instruct"></label>
+        <label>Модель эмбеддингов (поиск навыков)<input id="emb-model" list="models" placeholder="text-embedding-nomic-embed-text-v1.5 (пусто = без неё)"></label>
+        <label>Температура<input id="llm-temp" type="number" step="0.05" min="0" max="2"></label>
+        <label>Инструментов на запрос (0 = все)<input id="llm-tools" type="number" min="0" max="40"></label>
+      </div>
+      <datalist id="models"></datalist>
+      <div id="models-status" class="hint"></div>
+    </div>
+
+    <div class="card">
+      <h2>Автономное поведение</h2>
+      <label class="check"><input type="checkbox" id="au-enabled"> Включено (сам ест, защищается, выгружает инвентарь в сундуки базы)</label>
+      <div class="grid">
+        <label>Есть, когда еда ниже<input id="au-eat" type="number" min="0" max="20"></label>
+        <label>Убегать, когда здоровье ниже<input id="au-flee" type="number" min="0" max="20"></label>
+        <label>Атаковать врагов ближе (блоков)<input id="au-fight" type="number" min="0" max="32"></label>
+        <label>Выгружать инвентарь при заполнении, %<input id="au-deposit" type="number" min="10" max="100"></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Прочее</h2>
+      <div class="grid">
+        <label>Уровень логов<select id="log-cfg"><option>info</option><option>debug</option><option>warn</option></select></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Справка ===== -->
+  <section id="page-help" class="page">
+    <header class="row"><h1>Справка</h1></header>
+    <div class="card prose">
+      <h2>Быстрый старт</h2>
+      <ol>
+        <li>Установите <b>LM Studio</b>, скачайте модель (например <code>Qwen2.5-7B-Instruct</code>) и включите <b>Local Server</b> (вкладка Developer → Start Server, порт 1234).</li>
+        <li>Запустите сервер Minecraft (или откройте мир «для сети» — порт будет показан в чате) версии не выше 26.1.</li>
+        <li>На вкладке <b>Настройки</b> укажите адрес сервера, нажмите «Проверить и загрузить модели», выберите модель и сохраните.</li>
+        <li>Нажмите <b>Запустить</b>. Бот зайдёт на сервер под указанным ником.</li>
+      </ol>
+      <h2>Как общаться с ботом</h2>
+      <p>В игровом чате обращайтесь по имени: <code>Боб, иди сюда</code>, <code>Боб, наруби 10 брёвен</code>, <code>Боб, построй дом из досок</code>. В окне программы имя не нужно.</p>
+      <p>Команды напрямую (без нейросети): <code>!help</code>, <code>!get_status</code>, <code>!come_here</code>, <code>!collect_block block=iron_ore count=5</code>, <code>!stop</code>.</p>
+      <h2>Режимы</h2>
+      <p><b>Одна модель</b> — проще, меньше памяти. <b>Две модели</b> — чат на быстрой модели, а новые навыки пишет сильная coder-модель (Qwen2.5-Coder, Devstral). Для видеокарты на 8 ГБ: 7B Q4 для чата; coder-модель LM Studio подгрузит при необходимости.</p>
+      <h2>Самообучение</h2>
+      <p>Если подходящего умения нет, бот пишет JavaScript-навык сам, проверяет его в песочнице и сохраняет в папку данных. Выученные навыки: <code>!list_learned_skills</code>, удалить: <code>!forget_skill name=…</code>.</p>
+      <h2>Безопасность</h2>
+      <p>Не давайте боту права оператора. Сгенерированный код выполняется в ограниченной песочнице, но это не полная защита — запускайте бота только на своих серверах.</p>
+    </div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

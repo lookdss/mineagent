@@ -2,13 +2,17 @@
   "name": "mineagent",
   "version": "1.0.0",
   "description": "Autonomous Minecraft AI companion (Mineflayer + local LLM via LM Studio)",
-  "main": "src/index.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "start": "node src/index.js",
     "test": "node scripts/check.js",
     "test-llm": "node scripts/test-llm.js",
     "test-e2e": "node scripts/e2e.js",
-    "player": "node scripts/player.js"
+    "player": "node scripts/player.js",
+    "gui": "electron .",
+    "dist:win": "electron-builder --win --x64",
+    "dist:linux": "electron-builder --linux AppImage --x64",
+    "dist:dir": "electron-builder --dir"
   },
   "keywords": [
     "minecraft",
@@ -36,5 +40,78 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "build": {
+    "appId": "ai.mineagent.desktop",
+    "productName": "MineAgent",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "npmRebuild": false,
+    "files": [
+      "electron/**",
+      "src/**",
+      "config.example.json",
+      "package.json",
+      "!node_modules/onnxruntime-node/**",
+      "!node_modules/onnxruntime-web/**",
+      "!node_modules/@huggingface/**",
+      "!node_modules/typescript/**",
+      "!node_modules/**/minecraft-data/minecraft-data/data/bedrock/**",
+      "!node_modules/**/*.{md,map,ts}",
+      "!node_modules/**/{test,tests,__tests__,docs,example,examples}/**",
+      "!node_modules/onnxruntime-common/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "electron/icon.png",
+      "files": [
+        "!node_modules/@lancedb/lancedb-linux-*/**",
+        "!node_modules/@lancedb/lancedb-darwin-*/**"
+      ]
+    },
+    "portable": {
+      "artifactName": "MineAgent-portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "artifactName": "MineAgent-setup.exe",
+      "shortcutName": "MineAgent"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Game",
+      "icon": "electron/icon.png",
+      "files": [
+        "!node_modules/@lancedb/lancedb-win32-*/**",
+        "!node_modules/@lancedb/lancedb-darwin-*/**"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^26.15.3"
   }
 }
