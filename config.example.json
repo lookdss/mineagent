@@ -1,0 +1,58 @@
+{
+  "minecraft": {
+    "host": "127.0.0.1",
+    "port": 25565,
+    "username": "Bob",
+    "auth": "offline",
+    "version": false
+  },
+  "bot": {
+    "triggerNames": ["Боб", "Bob", "боб", "bob"],
+    "language": "ru",
+    "ownerPlayers": [],
+    "chatMaxLength": 240,
+    "quickTaskTimeoutMs": 8000,
+    "cancelTaskOnNewCommand": true
+  },
+  "llm": {
+    "baseUrl": "http://localhost:1234/v1",
+    "apiKey": "lm-studio",
+    "mode": "single",
+    "models": {
+      "chat": "qwen2.5-7b-instruct",
+      "coder": "devstral-small-2-24b"
+    },
+    "temperature": 0.3,
+    "maxTokens": 1024,
+    "requestTimeoutMs": 120000,
+    "historyTurns": 12,
+    "maxToolRounds": 4, "maxToolsPerRequest": 12, "routerFallback": true
+  },
+  "embeddings": {
+    "model": "text-embedding-nomic-embed-text-v1.5",
+    "fallbackToLocal": true
+  },
+  "skillLibrary": {
+    "dir": "./data/skills",
+    "learnedCodeDir": "./data/learned",
+    "minSimilarity": 0.68,
+    "maxFixIterations": 4,
+    "sandboxTimeoutMs": 30000
+  },
+  "autonomy": {
+    "enabled": true,
+    "tickMs": 5000,
+    "eatBelowFood": 14,
+    "fleeBelowHealth": 8,
+    "fightHostilesWithin": 6,
+    "depositWhenInventoryAbove": 0.8,
+    "travelKit": ["pickaxe", "axe", "sword", "shovel", "torch", "cooked_", "bread", "crafting_table"],
+    "idleThinkEveryMs": 0
+  },
+  "safety": {
+    "forbiddenPlaceBlocks": ["tnt", "lava_bucket", "fire", "flint_and_steel", "end_crystal", "respawn_anchor"],
+    "forbiddenDigBlocks": ["bedrock", "spawner", "chest", "trapped_chest", "barrel", "shulker_box", "beacon", "ender_chest"],
+    "maxTerrainVariance": 3
+  },
+  "logging": { "level": "info" }
+}
