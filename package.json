@@ -1,6 +1,6 @@
 {
   "name": "mineagent",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Autonomous Minecraft AI companion (Mineflayer + local LLM via LM Studio)",
   "main": "electron/main.cjs",
   "scripts": {
@@ -27,6 +27,7 @@
   "type": "module",
   "dependencies": {
     "@lancedb/lancedb": "^0.40.0",
+    "apache-arrow": "18.1.0",
     "mineflayer": "^4.39.0",
     "mineflayer-auto-eat": "^5.0.3",
     "mineflayer-collectblock": "^1.6.0",
@@ -62,7 +63,7 @@
       "!node_modules/onnxruntime-web/**",
       "!node_modules/@huggingface/**",
       "!node_modules/typescript/**",
-      "!node_modules/**/minecraft-data/minecraft-data/data/bedrock/**",
+      "!node_modules/**/minecraft-data/minecraft-data/data/bedrock/[0-9]*/**",
       "!node_modules/**/*.{md,map,ts}",
       "!node_modules/**/{test,tests,__tests__,docs,example,examples}/**",
       "!node_modules/onnxruntime-common/**"
